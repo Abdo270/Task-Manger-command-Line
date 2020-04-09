@@ -4,9 +4,6 @@ using System.Diagnostics;
 using System.Threading;
 namespace cmd_1 { 
     class Program { 
-        //abdelrahman khalifa 
-        //walied mamdoh fatoh
-        // cs 2 , cs 2
         static void Main(string[] args) { 
             double CPUUsage;
             Process [] pros = Process.GetProcesses();
