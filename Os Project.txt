@@ -1,0 +1,214 @@
+using System;
+using System.Text;
+using System.Diagnostics;
+using System.Threading;
+namespace cmd_1 { 
+    class Program { 
+        //abdelrahman khalifa 
+        //walied mamdoh fatoh
+        // cs 2 , cs 2
+        static void Main(string[] args) { 
+            double CPUUsage;
+            Process [] pros = Process.GetProcesses();
+            DateTime[] curTime = new DateTime[pros.Length];
+            DateTime[] lastTime = new DateTime[pros.Length];
+            TimeSpan[] lastTotalProcessorTime = new TimeSpan[pros.Length];
+            TimeSpan[] curTotalProcessorTime = new TimeSpan[pros.Length];
+            Console.WriteLine("welcome to  cmd \n ");
+            do { 
+                StringBuilder FirstCommand = new StringBuilder();
+                string[] CommandLine;
+                Console.Write(">> ");
+                CommandLine = Console.ReadLine().Trim().Split(' ');
+                for (int i = 0; i < CommandLine.Length; i++)
+                    FirstCommand.Append(CommandLine[i].Trim());
+                switch ((FirstCommand.ToString().ToLower())) { 
+                    case "listprocess":
+                        Console.WriteLine("Count: {0}", pros.Length);
+                        Console.WriteLine("wait...");
+                        for (int i = 0; i < pros.Length; i = i + 1)
+                        {
+                            Process p = pros[i];
+                            try
+                            {
+                                lastTime[i] = DateTime.Now;
+                                lastTotalProcessorTime[i] = p.TotalProcessorTime;
+                            }
+                            catch { }
+                        }
+                        Thread.Sleep(5000);
+                        for (int i = 0; i < pros.Length; i = i + 1)
+                        {
+                            Process p = pros[i];
+                            try
+                            {
+                                curTime[i] = DateTime.Now;
+                                curTotalProcessorTime[i] = p.TotalProcessorTime;
+                            }
+                            catch(Exception n) {
+                                Console.WriteLine("------------------------------------------------------------------------------------------------");
+                                Console.WriteLine("Name   : {0}  ::  status {1}  ", p.ProcessName, n.Message);
+                             };
+                        }
+                        for (int i = 0; i < (pros.Length); i = i + 1)
+                        {
+                            try
+                            {
+                                CPUUsage = (curTotalProcessorTime[i].TotalMilliseconds - lastTotalProcessorTime[i].TotalMilliseconds) / curTime[i].Subtract(lastTime[i]).TotalMilliseconds / Convert.ToDouble(Environment.ProcessorCount);
+                                Console.WriteLine("------------------------------------------------------------------------");
+                                Console.WriteLine("Name   : {0}   :   Proce ss ID   : {1}  CPU:   {2:0.0}%  ", pros[i].ProcessName, pros[i].Id, CPUUsage * 100);
+                                Console.WriteLine("------------------------------------------------------------------------");
+                            }
+                            catch { };
+                        }
+                        break;
+                    case "killprocess":
+                        StringBuilder IdOrName = new StringBuilder();
+                        string[] ProcessKillLine;
+                        Console.Write("enter id or name >> ");
+                        ProcessKillLine = Console.ReadLine().Trim().Split(' ');
+                        for (int i = 0; i < ProcessKillLine.Length; i++)
+                            IdOrName.Append(ProcessKillLine[i].Trim());
+                        try
+                        {
+                            int ID = int.Parse(IdOrName.ToString());
+                            Process ppp = Process.GetProcessById(ID);
+                            ppp.Kill();
+                            Console.WriteLine($"The process {ppp.ProcessName} is killed.");
+                        }
+                        catch (Exception e1)
+                        {
+                            if (e1 is System.ComponentModel.Win32Exception)
+                            {
+                                Console.WriteLine($"'{IdOrName}' is system process can't kill you have to be administrator");
+                                break;
+                            }
+                            Process[] pp = Process.GetProcessesByName(IdOrName.ToString());
+                            try
+                            {
+                                pp[0].Kill();
+                                Console.WriteLine($"The process {pp[0].ProcessName} is killed.");
+                            }
+                            catch(Exception e )
+                            {
+                                if (e is System.ComponentModel.Win32Exception)
+                                    Console.WriteLine($"'{IdOrName}' is system process can't kill you have to be administrator");
+                                else 
+                                    Console.WriteLine($"'{IdOrName}' is not found ");
+                            }
+                        }
+                        break;
+                    case "changepriority":
+                        StringBuilder IdOrNameOfPriority = new StringBuilder();
+                        string[] PriorityLine;
+                        Console.Write("enter id or name >> ");
+                        PriorityLine = Console.ReadLine().Trim().Split(' ');
+                        for (int i = 0; i < PriorityLine.Length; i++)
+                            IdOrNameOfPriority.Append(PriorityLine[i].Trim());
+                        try {
+                            int IdOfPriorityProcess = int.Parse(IdOrNameOfPriority.ToString());
+                            Process PriorityProcess = Process.GetProcessById(IdOfPriorityProcess);
+                            Console.Write("Enter the Priority >> ");
+                            StringBuilder priority = new StringBuilder();
+                            string[] PriorityProcessLine = Console.ReadLine().Trim().Split();
+                            for (int i = 0; i < PriorityProcessLine.Length; i++)
+                                priority.Append(PriorityProcessLine[i]);
+                            switch (priority.ToString().ToLower())
+                            {
+                                case "high":
+                                    PriorityProcess.PriorityClass = ProcessPriorityClass.High;
+                                    Console.WriteLine($"The process {IdOrNameOfPriority} is {priority} now .");
+                                    break;
+                                case "idel":
+                                    PriorityProcess.PriorityClass = ProcessPriorityClass.Idle;
+                                    Console.WriteLine($"The process {IdOrNameOfPriority} is {priority} now .");
+                                    break;
+                                case "normal":
+                                    PriorityProcess.PriorityClass = ProcessPriorityClass.Normal;
+                                    Console.WriteLine($"The process {IdOrNameOfPriority} is {priority} now .");
+                                    break;
+                                case "abovenormal":
+                                    PriorityProcess.PriorityClass = ProcessPriorityClass.AboveNormal;
+                                    Console.WriteLine($"The process {IdOrNameOfPriority} is {priority} now .");
+                                    break;
+                                case "belownormal":
+                                    PriorityProcess.PriorityClass = ProcessPriorityClass.BelowNormal;
+                                    Console.WriteLine($"The process {IdOrNameOfPriority} is {priority} now .");
+                                    break;
+                                case "realtime":
+                                    PriorityProcess.PriorityClass = ProcessPriorityClass.RealTime;
+                                    Console.WriteLine($"The process {IdOrNameOfPriority} is {priority} now .");
+                                    break;
+                                default:
+                                    Console.WriteLine($">> {priority} is not correct priority ");
+                                    break;
+                            }
+                        }
+                        catch (Exception h)
+                        {
+                            if (h is System.ArgumentException)
+                            {
+                                Console.WriteLine(h.Message);
+                                break;
+                            }
+                            try
+                            {
+                                Process[] PriorityProcess = Process.GetProcessesByName(IdOrNameOfPriority.ToString());
+                                //to chack the name is found or not the above line 
+                                PriorityProcess[0].PriorityClass = ProcessPriorityClass.Normal;
+                                Console.Write("Enter the Priority >>  ");
+                                StringBuilder priority = new StringBuilder();
+                                string[] PriorityProcessLine = Console.ReadLine().Trim().Split();
+                                for (int i = 0; i < PriorityProcessLine.Length; i++)
+                                    priority.Append(PriorityProcessLine[i]);
+                                switch (priority.ToString().ToLower())
+                                {
+                                    case "high":
+                                        PriorityProcess[0].PriorityClass = ProcessPriorityClass.High;
+                                        Console.WriteLine($"The process {IdOrNameOfPriority} is {priority} now .");
+                                        break;
+                                    case "idel":
+                                        PriorityProcess[0].PriorityClass = ProcessPriorityClass.Idle;
+                                        Console.WriteLine($"The process {IdOrNameOfPriority} is {priority} now .");
+                                        break;
+                                    case "normal":
+                                        PriorityProcess[0].PriorityClass = ProcessPriorityClass.Normal;
+                                        Console.WriteLine($"The process {IdOrNameOfPriority} is {priority} now .");
+                                        break;
+                                    case "abovenormal":
+                                        PriorityProcess[0].PriorityClass = ProcessPriorityClass.AboveNormal;
+                                        Console.WriteLine($"The process {IdOrNameOfPriority} is {priority} now .");
+                                        break;
+                                    case "belownormal":
+                                        PriorityProcess[0].PriorityClass = ProcessPriorityClass.BelowNormal;
+                                        Console.WriteLine($"The process {IdOrNameOfPriority} is {priority} now .");
+                                        break;
+                                    case "realtime":
+                                        PriorityProcess[0].PriorityClass = ProcessPriorityClass.RealTime;
+                                        Console.WriteLine($"The process {IdOrNameOfPriority} is {priority} now .");
+                                        break;
+                                    default:
+                                        Console.WriteLine($">>> {priority} is not correct priority ");
+                                        break;
+                                }
+                            }
+                            catch (Exception x)
+                            {
+                                if (x is System.ComponentModel.Win32Exception)
+                                    Console.WriteLine($"'{IdOrNameOfPriority}' is a system process can't change it's priority .");
+                                else
+                                    Console.WriteLine($"'{IdOrNameOfPriority}' is not found");
+                            }
+                        }
+                        break;
+                    case "help":
+                        Console.WriteLine("-list process \n-kill process \n-help \n-change priority");
+                        break;
+                    default:
+                        Console.WriteLine($"'{FirstCommand}' is not correct command ");
+                        break;
+                }
+            } while (true);
+        }
+    }
+}
